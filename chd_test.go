@@ -1,4 +1,4 @@
-package mph
+package uint64mph
 
 import (
 	"bufio"

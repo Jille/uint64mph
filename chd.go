@@ -27,7 +27,7 @@
 // slice and slicing the keys and values.
 //
 // See https://github.com/alecthomas/mph for source.
-package mph
+package uint64mph
 
 import (
 	"bytes"
