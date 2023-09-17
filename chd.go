@@ -1,5 +1,7 @@
-// Package mph is a Go implementation of the compress, hash and displace (CHD)
-// minimal perfect hash algorithm.
+// Package uint64mph is a Go implementation of the compress, hash and displace (CHD)
+// minimal perfect hash algorithm. Based on github.com/alecthomas/mph.
+//
+// This is basically https://github.com/alecthomas/mph, but with uint64 keys and values instead of []byte.
 //
 // See http://cmph.sourceforge.net/papers/esa09.pdf for details.
 //
@@ -26,7 +28,8 @@
 // MMAP is also indirectly supported, by deserializing from a byte
 // slice and slicing the keys and values.
 //
-// See https://github.com/alecthomas/mph for source.
+// See https://github.com/Jille/uint64mph for source.
+// See https://github.com/alecthomas/mph for the original source.
 package uint64mph
 
 import (

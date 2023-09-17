@@ -1,4 +1,8 @@
+[![](https://godoc.org/github.com/Jille/uint64mph?status.svg)](https://pkg.go.dev/github.com/Jille/uint64mph)
+
 # Minimal Perfect Hashing for Go
+
+This is basically https://github.com/alecthomas/mph, but with uint64 keys and values instead of []byte.
 
 This library provides [Minimal Perfect Hashing](http://en.wikipedia.org/wiki/Perfect_hash_function) (MPH) using the [Compress, Hash and Displace](http://cmph.sourceforge.net/papers/esa09.pdf) (CHD) algorithm.
 
@@ -34,12 +38,10 @@ Deserializing the hash table and performing lookups:
 r, _ := os.Open("data.idx")
 h, _ := mph.Read(r)
 
-v := h.Get([]byte("some key"))
+v := h.Get(1337)
 if v == nil {
     // Key not found
 }
 ```
 
 MMAP is also indirectly supported, by deserializing from a byte slice and slicing the keys and values.
-
-The [API documentation](http://godoc.org/github.com/alecthomas/mph) has more details.
