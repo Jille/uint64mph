@@ -19,12 +19,15 @@ type sliceReader struct {
 	start, end uint64
 }
 
-func (b *sliceReader) Read(size uint64) []byte {
+func (b *sliceReader) read(size uint64) []byte {
 	b.start, b.end = b.end, b.end+size
 	return b.b[b.start:b.end]
 }
 
 func (b *sliceReader) ReadUint64Array(n uint64) []uint64 {
+	if n == 0 {
+		return []uint64{}
+	}
 	b.start, b.end = b.end, b.end+n*8
 	return unsafeslice.Uint64SliceFromByteSlice(b.b[b.start:b.end])
 }
@@ -37,5 +40,5 @@ func (b *sliceReader) ReadUint16Array(n uint64) []uint16 {
 // Despite returning a uint64, this actually reads a uint32. All table indices
 // and lengths are stored as uint32 values.
 func (b *sliceReader) ReadInt() uint64 {
-	return uint64(binary.LittleEndian.Uint32(b.Read(4)))
+	return uint64(binary.LittleEndian.Uint32(b.read(4)))
 }

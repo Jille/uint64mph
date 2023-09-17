@@ -33,10 +33,10 @@
 package uint64mph
 
 import (
-	"bytes"
 	"encoding/binary"
 	"io"
 	"io/ioutil"
+	"math"
 )
 
 // CHD hash table lookup.
@@ -47,13 +47,15 @@ type CHD struct {
 	// more than 2^16 hash functions O_o
 	indices []uint16
 	// Final table of values.
-	keys   [][]byte
-	values [][]byte
+	keys   []uint64
+	values []uint64
 }
 
-func hasher(data []byte) uint64 {
+func hasher(data uint64) uint64 {
+	var buf [8]byte
+	binary.LittleEndian.PutUint64(buf[:], data)
 	var hash uint64 = 14695981039346656037
-	for _, c := range data {
+	for _, c := range buf {
 		hash ^= uint64(c)
 		hash *= 1099511628211
 	}
@@ -85,35 +87,28 @@ func Mmap(b []byte) (*CHD, error) {
 
 	el := bi.ReadInt()
 
-	c.keys = make([][]byte, el)
-	c.values = make([][]byte, el)
-
-	for i := uint64(0); i < el; i++ {
-		kl := bi.ReadInt()
-		vl := bi.ReadInt()
-		c.keys[i] = bi.Read(kl)
-		c.values[i] = bi.Read(vl)
-	}
+	c.keys = bi.ReadUint64Array(el)
+	c.values = bi.ReadUint64Array(el)
 
 	return c, nil
 }
 
 // Get an entry from the hash table.
-func (c *CHD) Get(key []byte) []byte {
+func (c *CHD) Get(key uint64) uint64 {
 	r0 := c.r[0]
 	h := hasher(key) ^ r0
 	i := h % uint64(len(c.indices))
 	ri := c.indices[i]
 	// This can occur if there were unassigned slots in the hash table.
 	if ri >= uint16(len(c.r)) {
-		return nil
+		return math.MaxUint64
 	}
 	r := c.r[ri]
 	ti := (h ^ r) % uint64(len(c.keys))
 	// fmt.Printf("r[0]=%d, h=%d, i=%d, ri=%d, r=%d, ti=%d\n", c.r[0], h, i, ri, r, ti)
 	k := c.keys[ti]
-	if bytes.Compare(k, key) != 0 {
-		return nil
+	if k != key {
+		return math.MaxUint64
 	}
 	v := c.values[ti]
 	return v
@@ -147,24 +142,14 @@ func (c *CHD) Write(w io.Writer) error {
 		uint32(len(c.r)), c.r,
 		uint32(len(c.indices)), c.indices,
 		uint32(len(c.keys)),
+		c.keys,
+		c.values,
 	}
 
 	if err := write(data...); err != nil {
 		return err
 	}
 
-	for i := range c.keys {
-		k, v := c.keys[i], c.values[i]
-		if err := write(uint32(len(k)), uint32(len(v))); err != nil {
-			return err
-		}
-		if _, err := w.Write(k); err != nil {
-			return err
-		}
-		if _, err := w.Write(v); err != nil {
-			return err
-		}
-	}
 	return nil
 }
 
@@ -173,7 +158,7 @@ type Iterator struct {
 	c *CHD
 }
 
-func (c *Iterator) Get() (key []byte, value []byte) {
+func (c *Iterator) Get() (key, value uint64) {
 	return c.c.keys[c.i], c.c.values[c.i]
 }
 
