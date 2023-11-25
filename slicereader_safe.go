@@ -13,6 +13,11 @@ type sliceReader struct {
 	start, end uint64
 }
 
+func (b *sliceReader) read(size uint64) []byte {
+	b.start, b.end = b.end, b.end+size
+	return b.b[b.start:b.end]
+}
+
 func (b *sliceReader) ReadUint64Array(n uint64) []uint64 {
 	b.start, b.end = b.end, b.end+n*8
 	out := make([]uint64, n)
@@ -34,5 +39,5 @@ func (b *sliceReader) ReadUint16Array(n uint64) []uint16 {
 }
 
 func (b *sliceReader) ReadInt() uint64 {
-	return uint64(binary.LittleEndian.Uint32(b.Read(4)))
+	return uint64(binary.LittleEndian.Uint32(b.read(4)))
 }
