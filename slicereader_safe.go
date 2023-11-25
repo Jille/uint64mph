@@ -1,5 +1,5 @@
-//go:build !386 && !amd64 && !arm
-// +build !386,!amd64,!arm
+//go:build !386 && !amd64 && !arm && !arm64
+// +build !386,!amd64,!arm,!arm64
 
 package uint64mph
 
