@@ -1,9 +1,9 @@
 module github.com/Jille/uint64mph
 
-go 1.20
+go 1.21.6
 
 require (
-	github.com/alecthomas/unsafeslice v0.1.0
+	github.com/alecthomas/unsafeslice v0.2.0
 	github.com/stretchr/testify v1.8.4
 )
 
